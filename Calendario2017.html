@@ -235,7 +235,7 @@
 			rect.filter(function(d) { return d in data; })
 				.attr("fill", function(d) { return color(data[d]); })
 				.attr("data-title", function(d) { return "value : "+Math.round(data[d]*100)});   
-				$("rect").tooltip({container: 'body', html: true, placement:'top'}); 
+				//$("rect").tooltip({container: 'body', html: true, placement:'top'}); 
 			//});
 			
 			function numberWithCommas(x) {
