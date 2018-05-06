@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+	<head>
+		<title>Calendario laboral de Madrid</title>
+	
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+		
+		<style>
+			.calender-map {
+				font: 10px sans-serif;
+			}
+			.day {
+				stroke: #666;
+			}
+			.month {
+				fill: none;
+				stroke: #000;
+				stroke-width: 2px;
+			}
+		</style>
+		
+	</head>
+	<body>
+		
+		<div class="calender-map"></div>
+		<script type="text/javascript" >
+			var width = 1000,
+				height = 125,
+				cellSize = 16,	// cell size
+				week_days = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'],
+				month = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+			
+			var day = function(d) { return (d.getDay() + 6) % 7; }, // lunes = 0
+				week = d3.time.format("%W"), // semana basada en lunes.
+				parseDate = d3.time.format("%Y-%m-%d"),
+				percent = d3.format("+.1%"),
+				format = d3.time.format("%Y%m%d");
+					
+			var color = d3.scale.linear().range(["white", '#002b53'])
+				.domain([0, 1])
+				
+			var svg = d3.select(".calender-map").selectAll("svg")
+				.data(d3.range(2019, 2020))
+				.enter().append("svg")
+				.attr("width", '100%')
+				.attr("data-height", '0.5678')
+				.attr("viewBox",'0 0 1000 125')
+				.attr("class", "RdYlGn")
+				.append("g")
+				.attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")");
+				
+				svg.append("text")
+					.attr("transform", "translate(-38," + cellSize * 3.5 + ")rotate(-90)")
+					.style("text-anchor", "middle")
+					.text(function(d) { return d; });
+			
+			for (var i=0; i<7; i++)
+			{    
+				svg.append("text")
+					.attr("transform", "translate(-5," + cellSize*(i+1) + ")")
+					.style("text-anchor", "end")
+					.attr("dy", "-.25em")
+					.text(function(d) { return week_days[i]; }); 
+			}
+			
+			var rect = svg.selectAll(".day")
+				.data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+				.enter()
+				.append("rect")
+				.attr("class", "day")
+				.attr("width", cellSize)
+				.attr("height", cellSize)
+				.attr("x", function(d) { return week(d) * cellSize; })
+				.attr("y", function(d) { return day(d) * cellSize; })
+				.attr("fill",'#fff')
+				.datum(format);
+			
+			var legend = svg.selectAll(".legend")
+				.data(month)
+				.enter().append("g")
+				.attr("class", "legend")
+				.attr("transform", function(d, i) { return "translate(" + (((i+1) * 70)-15) + ",0)"; });
+			
+			legend.append("text")
+				.attr("class", function(d,i){ return month[i] })
+				.style("text-anchor", "end")
+				.attr("dy", "-.25em")
+				.text(function(d,i){ return month[i] });
+			
+			svg.selectAll(".month")
+				.data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+				.enter().append("path")
+				.attr("class", "month")
+				.attr("id", function(d,i){ return month[i] })
+				.attr("d", monthPath);
+			
+			//Fines de Semana.
+			var rectangle = svg.append("rect")
+									.attr("x", 0)
+									.attr("y", 80)
+									.attr("width", 831)
+									.attr("height", 31)
+									.attr("fill-opacity",0.1);
+                                    
+			//Fiestas no laborables y jornadas intensivas.
+			var dataCal = [
+				{Date:20190101,Comparison_Type:9999},
+				{Date:20190106,Comparison_Type:9999},
+				{Date:20190329,Comparison_Type:9999}, 
+				{Date:20190330,Comparison_Type:9999},
+				{Date:20190501,Comparison_Type:9999},
+				{Date:20190502,Comparison_Type:9999},
+				{Date:20190515,Comparison_Type:9999},
+			
+				{Date:20190601,Comparison_Type:	100}, //verano intensiva
+				{Date:20190602,Comparison_Type:	100}, //verano intensiva
+				{Date:20190603,Comparison_Type:	100}, //verano intensiva
+				{Date:20190604,Comparison_Type:	100}, //verano intensiva
+				{Date:20190605,Comparison_Type:	100}, //verano intensiva
+				{Date:20190606,Comparison_Type:	100}, //verano intensiva
+				{Date:20190607,Comparison_Type:	100}, //verano intensiva
+				{Date:20190608,Comparison_Type:	100}, //verano intensiva
+				{Date:20190609,Comparison_Type:	100}, //verano intensiva
+				{Date:20190610,Comparison_Type:	100}, //verano intensiva
+				{Date:20190611,Comparison_Type:	100}, //verano intensiva
+				{Date:20190612,Comparison_Type:	100}, //verano intensiva
+				{Date:20190613,Comparison_Type:	100}, //verano intensiva
+				{Date:20190614,Comparison_Type:	100}, //verano intensiva
+				{Date:20190615,Comparison_Type:	100}, //verano intensiva
+				{Date:20190616,Comparison_Type:	100}, //verano intensiva
+				{Date:20190617,Comparison_Type:	100}, //verano intensiva
+				{Date:20190618,Comparison_Type:	100}, //verano intensiva
+				{Date:20190619,Comparison_Type:	100}, //verano intensiva
+				{Date:20190620,Comparison_Type:	100}, //verano intensiva
+				{Date:20190621,Comparison_Type:	100}, //verano intensiva
+				{Date:20190622,Comparison_Type:	100}, //verano intensiva
+				{Date:20190623,Comparison_Type:	100}, //verano intensiva
+				{Date:20190624,Comparison_Type:	100}, //verano intensiva
+				{Date:20190625,Comparison_Type:	100}, //verano intensiva
+				{Date:20190626,Comparison_Type:	100}, //verano intensiva
+				{Date:20190627,Comparison_Type:	100}, //verano intensiva
+				{Date:20190628,Comparison_Type:	100}, //verano intensiva
+				{Date:20190629,Comparison_Type:	100}, //verano intensiva
+				{Date:20190630,Comparison_Type:	100}, //verano intensiva
+
+				{Date:20190701,Comparison_Type:	100}, //verano intensiva
+				{Date:20190702,Comparison_Type:	100}, //verano intensiva
+				{Date:20190703,Comparison_Type:	100}, //verano intensiva
+				{Date:20190704,Comparison_Type:	100}, //verano intensiva
+				{Date:20190705,Comparison_Type:	100}, //verano intensiva
+				{Date:20190706,Comparison_Type:	100}, //verano intensiva
+				{Date:20190707,Comparison_Type:	100}, //verano intensiva
+				{Date:20190708,Comparison_Type:	100}, //verano intensiva
+				{Date:20190709,Comparison_Type:	100}, //verano intensiva
+				{Date:20190710,Comparison_Type:	100}, //verano intensiva
+				{Date:20190711,Comparison_Type:	100}, //verano intensiva
+				{Date:20190712,Comparison_Type:	100}, //verano intensiva
+				{Date:20190713,Comparison_Type:	100}, //verano intensiva
+				{Date:20190714,Comparison_Type:	100}, //verano intensiva
+				{Date:20190715,Comparison_Type:	100}, //verano intensiva
+				{Date:20190716,Comparison_Type:	100}, //verano intensiva
+				{Date:20190717,Comparison_Type:	100}, //verano intensiva
+				{Date:20190718,Comparison_Type:	100}, //verano intensiva
+				{Date:20190719,Comparison_Type:	100}, //verano intensiva
+				{Date:20190720,Comparison_Type:	100}, //verano intensiva
+				{Date:20190721,Comparison_Type:	100}, //verano intensiva
+				{Date:20190722,Comparison_Type:	100}, //verano intensiva
+				{Date:20190723,Comparison_Type:	100}, //verano intensiva
+				{Date:20190724,Comparison_Type:	100}, //verano intensiva
+				{Date:20190725,Comparison_Type:	100}, //verano intensiva
+				{Date:20190726,Comparison_Type:	100}, //verano intensiva
+				{Date:20190727,Comparison_Type:	100}, //verano intensiva
+				{Date:20190728,Comparison_Type:	100}, //verano intensiva
+				{Date:20190729,Comparison_Type:	100}, //verano intensiva
+				{Date:20190730,Comparison_Type:	100}, //verano intensiva
+				{Date:20190731,Comparison_Type:	100}, //verano intensiva
+
+				{Date:20190801,Comparison_Type:	100}, //verano intensiva
+				{Date:20190802,Comparison_Type:	100}, //verano intensiva
+				{Date:20190803,Comparison_Type:	100}, //verano intensiva
+				{Date:20190804,Comparison_Type:	100}, //verano intensiva
+				{Date:20190805,Comparison_Type:	100}, //verano intensiva
+				{Date:20190806,Comparison_Type:	100}, //verano intensiva
+				{Date:20190807,Comparison_Type:	100}, //verano intensiva
+				{Date:20190808,Comparison_Type:	100}, //verano intensiva
+				{Date:20190809,Comparison_Type:	100}, //verano intensiva
+				{Date:20190810,Comparison_Type:	100}, //verano intensiva
+				{Date:20190811,Comparison_Type:	100}, //verano intensiva
+				{Date:20190812,Comparison_Type:	100}, //verano intensiva
+				{Date:20190813,Comparison_Type:	100}, //verano intensiva
+				{Date:20190814,Comparison_Type:	100}, //verano intensiva
+
+				{Date:20190815,Comparison_Type:9999},
+				
+				{Date:20190816,Comparison_Type:	100}, //verano intensiva
+				{Date:20190817,Comparison_Type:	100}, //verano intensiva
+				{Date:20190818,Comparison_Type:	100}, //verano intensiva
+				{Date:20190819,Comparison_Type:	100}, //verano intensiva
+				{Date:20190820,Comparison_Type:	100}, //verano intensiva
+				{Date:20190821,Comparison_Type:	100}, //verano intensiva
+				{Date:20190822,Comparison_Type:	100}, //verano intensiva
+				{Date:20190823,Comparison_Type:	100}, //verano intensiva
+				{Date:20190824,Comparison_Type:	100}, //verano intensiva
+				{Date:20190825,Comparison_Type:	100}, //verano intensiva
+				{Date:20190826,Comparison_Type:	100}, //verano intensiva
+				{Date:20190827,Comparison_Type:	100}, //verano intensiva
+				{Date:20190828,Comparison_Type:	100}, //verano intensiva
+				{Date:20190829,Comparison_Type:	100}, //verano intensiva
+				{Date:20190830,Comparison_Type:	100}, //verano intensiva
+				{Date:20190831,Comparison_Type:	100}, //verano intensiva
+
+				{Date:20191012,Comparison_Type:9999},
+				{Date:20191101,Comparison_Type:9999},
+				{Date:20191206,Comparison_Type:9999},
+				{Date:20191208,Comparison_Type:9999},
+				{Date:20191224,Comparison_Type:9999},
+				{Date:20191225,Comparison_Type:9999},
+				{Date:20191231,Comparison_Type:9999}
+			];	
+			
+			/*
+				Posibilidad de cargar desde CSV, con formato:
+				
+				Date,Comparison_Type
+				20150101,0
+			*/
+			//d3.csv("data.csv", function(error, csv) {
+			dataCal.forEach(function(d) {
+				d.Comparison_Type = parseInt(d.Comparison_Type);
+			});
+			
+			var Comparison_Type_Max = d3.max(dataCal, function(d) { return d.Comparison_Type; });
+			
+			var data = d3.nest()
+				.key(function(d) { return d.Date; })
+				.rollup(function(d) { return  Math.sqrt(d[0].Comparison_Type / Comparison_Type_Max); })
+				.map(dataCal);
+				
+			rect.filter(function(d) { return d in data; })
+				.attr("fill", function(d) { return color(data[d]); })
+				.attr("data-title", function(d) { return "value : "+Math.round(data[d]*100)});   
+				//$("rect").tooltip({container: 'body', html: true, placement:'top'}); 
+			//});
+			
+			function numberWithCommas(x) {
+				x = x.toString();
+				var pattern = /(-?\d+)(\d{3})/;
+				while (pattern.test(x))
+					x = x.replace(pattern, "$1,$2");
+				return x;
+			}
+			
+			function monthPath(t0) {
+				var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
+					d0 = +day(t0), w0 = +week(t0),
+					d1 = +day(t1), w1 = +week(t1);
+					
+				return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
+					+ "H" + w0 * cellSize + "V" + 7 * cellSize
+					+ "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
+					+ "H" + (w1 + 1) * cellSize + "V" + 0
+					+ "H" + (w0 + 1) * cellSize + "Z";
+			}
+		</script>
+	</body>
+</html>
